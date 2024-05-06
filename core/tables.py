@@ -5,7 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship, Mapped
 from sqlalchemy.orm import mapped_column
 
 
-__all__ = ["Category", "Button", "LinkButton", "ScenarioButton", "Ownership"]
+__all__ = ["Base", "Category", "Button", "LinkButton", "ScenarioButton", "Ownership"]
 
 # Выбрасывать исключение при попытке обратиться к незагруженному свойству (lazy_loading)
 relationship = partial(relationship, lazy='raise_on_sql')
@@ -23,6 +23,7 @@ class Category(Base):
     Name: Mapped[str] = mapped_column(comment='Наименование категории (заголовок)')
     Text: Mapped[str] = mapped_column(comment='Текст категории')
     tree_header: Mapped[bool] = mapped_column(default=False, comment='Флаг вывода наименования категории с наименованием родителя')
+    page_size: Mapped[int | None] = mapped_column(comment='Количество кнопок на одной странице категории (при пагинации)')
 
 
 class Button(Base):

@@ -13,6 +13,5 @@ class DependencyInjectionMiddleware(BaseMiddleware):
             event: Message | CallbackQuery,
             data: dict[str, Any]
     ) -> Any:
-        session = AsyncSessionMaker()
-        await handler(event, data)
-        await session.close()
+        async with AsyncSessionMaker() as session:
+            await handler(event, data)
