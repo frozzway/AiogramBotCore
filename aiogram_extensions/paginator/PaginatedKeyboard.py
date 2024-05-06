@@ -1,30 +1,29 @@
 from __future__ import annotations
 
-import secrets
-
 from aiogram.fsm.context import FSMContext
-from aiogram_extensions.paginator.callbacks import Page
+from aiogram_extensions.paginator.callback import Page
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton
 
 
 class PaginatedKeyboard:
     @classmethod
-    async def create(cls, keyboard: InlineKeyboardBuilder, state: FSMContext, page_size: int = 5,
+    async def create(cls, keyboard: InlineKeyboardBuilder, unique_name: str, state: FSMContext, page_size: int = 5,
                      pre: InlineKeyboardBuilder | None = None, post: InlineKeyboardBuilder | None = None,
                      text: str | None = None) -> PaginatedKeyboard:
         """
         Клавиатура с пагинацией.
         :param keyboard: объект, подвергающийся пагинации.
+        :param unique_name: уникальное наименование клавиатуры.
         :param pre: статический блок кнопок, который будет добавлен перед списком элементов на каждой странице.
         :param post: статический блок кнопок, который будет добавлен после навигационной строки на каждой странице.
         :param text: текст, который отправлялся вместе с клавиатурой в обработчике, где клавиатура была инициализирована.
         """
-        self = cls(keyboard=keyboard, state=state, page_size=page_size, pre=pre, post=post, text=text)
+        self = cls(keyboard=keyboard, name=unique_name, state=state, page_size=page_size, pre=pre, post=post, text=text)
         await self._write_keyboard_to_state()
         await state.update_data(last_paginated_keyboard=self)
         return self
 
-    def __init__(self, keyboard: InlineKeyboardBuilder, state: FSMContext, page_size: int = 5,
+    def __init__(self, keyboard: InlineKeyboardBuilder, name: str, state: FSMContext, page_size: int = 5,
                  pre: InlineKeyboardBuilder | None = None, post: InlineKeyboardBuilder | None = None, text: str | None = None):
         self.keyboard = keyboard
         self.pre = pre
@@ -33,7 +32,7 @@ class PaginatedKeyboard:
         self.page_size = page_size
         self.last_viewed_page = 1
         self.text = text
-        self.keyboard_id = secrets.token_hex(16)
+        self.keyboard_id = name
         self.items = self.keyboard.export()
 
     def first_page(self) -> InlineKeyboardMarkup:
@@ -60,14 +59,6 @@ class PaginatedKeyboard:
     def last_opened_page_cb(self) -> Page:
         """Вернуть Callback на последнюю открытую страницу клавиатуры"""
         return Page(keyboard_id=self.keyboard_id, page=self.last_viewed_page)
-
-    @classmethod
-    async def last_opened(cls, state: FSMContext) -> PaginatedKeyboard | None:
-        """Вернуть объект PaginatedKeyboard последней открытой клавиатуры"""
-        data = await state.get_data()
-        paginated_keyboard = data.get('last_paginated_keyboard')
-        if isinstance(paginated_keyboard, PaginatedKeyboard):
-            return paginated_keyboard
 
     async def _write_keyboard_to_state(self):
         paginated_keyboards = await self._get_paginated_keyboards()

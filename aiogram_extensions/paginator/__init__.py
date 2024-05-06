@@ -1,2 +1,2 @@
 from .PaginatedKeyboard import PaginatedKeyboard
-from .routes import router
+from .handler import router

@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from . import PaginatedKeyboard
-from .callbacks import Page
+from .callback import Page
 
 
 router = Router(name=__name__)
@@ -20,7 +20,6 @@ async def change_page(query: CallbackQuery, callback_data: Page, state: FSMConte
                 page = callback_data.page
                 markup = keyboard.page(page)
                 keyboard.last_viewed_page = page
-                await state.update_data(last_paginated_keyboard=keyboard)
                 if keyboard.text:
                     return await query.message.edit_text(text=keyboard.text, reply_markup=markup)
                 return await query.message.edit_reply_markup(reply_markup=markup)
