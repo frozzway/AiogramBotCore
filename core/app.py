@@ -11,8 +11,8 @@ from aiogram_extensions.back_feature import MessageSaverMiddleware
 from core.aiogram import router as app_router
 from core.aiogram.middlewares import DependencyInjectionMiddleware
 from core.dependencies import http_client
-from core.database import main_thread_async_engine
-from core.tables import Base
+from core.database import main_thread_async_engine, Base, AsyncSessionMaker
+from core.managers import CategoryManager
 from core.settings import settings
 
 
@@ -54,6 +54,9 @@ async def run_scheduled_tasks():
 async def create_tables():
     async with main_thread_async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    async with AsyncSessionMaker() as session:
+        category_manager = CategoryManager(session=session)
+        await category_manager.create_main_category()
 
 
 async def main():

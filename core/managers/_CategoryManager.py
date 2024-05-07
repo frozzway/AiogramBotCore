@@ -12,7 +12,18 @@ class CategoryManager(DbBaseManager):
         super().__init__(session=session)
 
     @database_call
-    async def get_category(self, category_id: int) -> Category:
+    async def _create_category(self, category: Category):
+        self.session.add(category)
+        await self.session.commit()
+
+    async def create_main_category(self):
+        category = await self.get_category(1)
+        if not category:
+            category = Category(name="Главное меню")
+            await self._create_category(category)
+
+    @database_call
+    async def get_category(self, category_id: int) -> Category | None:
         return await self.session.scalar(select(Category).where(Category.id == category_id))
 
     @database_call

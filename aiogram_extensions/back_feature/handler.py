@@ -23,4 +23,4 @@ async def render_previous_message(query: CallbackQuery, state: FSMContext):
 
     message = stack.pop()
 
-    await query.message.edit_text(text=message.text, reply_markup=message.reply_markup)
+    await query.message.edit_text(text=message.text, reply_markup=message.reply_markup, parse_mode='HTML')

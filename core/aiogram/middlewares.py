@@ -6,6 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.exceptions import TelegramAPIError
 
 from core.database import AsyncSessionMaker
+from core.managers import CategoryManager
 
 
 class DependencyInjectionMiddleware(BaseMiddleware):
@@ -16,6 +17,7 @@ class DependencyInjectionMiddleware(BaseMiddleware):
             data: dict[str, Any]
     ) -> Any:
         async with AsyncSessionMaker() as session:
+            data['category_manager'] = CategoryManager(session)
             await handler(event, data)
 
 
@@ -29,8 +31,8 @@ class MessageEraserMiddleware(BaseMiddleware):
             data: dict[str, Any]
     ) -> Any:
         state: FSMContext = data['state']
-        data = await state.get_data()
-        if last_message := data.get('last_message'):
+        state_data = await state.get_data()
+        if last_message := state_data.get('last_message'):
             try:
                 await last_message.delete()
             except TelegramAPIError:

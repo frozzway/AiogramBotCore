@@ -20,7 +20,7 @@ class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     name: Mapped[str] = mapped_column(comment='Наименование категории (заголовок)')
-    text: Mapped[str] = mapped_column(comment='Текст категории')
+    text: Mapped[str | None] = mapped_column(comment='Текст категории')
     tree_header: Mapped[bool] = mapped_column(default=False, comment='Флаг вывода наименования категории с наименованием родителя')
     page_size: Mapped[int | None] = mapped_column(comment='Количество кнопок на одной странице категории (при пагинации)')
 
@@ -30,7 +30,7 @@ class Button(Base):
     __tablename__ = "Buttons"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
-    discriminator: Mapped[str]
+    Discriminator: Mapped[str]
 
     __mapper_args__ = {
         "polymorphic_abstract": True,

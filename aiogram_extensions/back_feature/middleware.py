@@ -2,10 +2,10 @@ from typing import Callable, Any, Awaitable
 
 from aiogram import BaseMiddleware
 from aiogram.dispatcher.flags import get_flag
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 
-from .stack import Stack
+from .stack import Stack, MessageInfo
 
 
 class MessageSaverMiddleware(BaseMiddleware):
@@ -22,12 +22,15 @@ class MessageSaverMiddleware(BaseMiddleware):
         if not stack:
             stack = Stack()
 
-        prev_message = event.message.model_copy(deep=True)
+        prev_message = MessageInfo(
+            text=event.message.html_text,
+            reply_markup=event.message.reply_markup,
+        )
 
         message = await handler(event, data)
 
         flag = get_flag(data, 'DisableBackFromAhead')
-        if message is not None and not flag:
+        if isinstance(message, Message) and not flag:
             stack: Stack
             stack.push(prev_message)
             await state.update_data(message_stack=stack)
