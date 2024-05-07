@@ -3,6 +3,7 @@ from typing import Callable, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
+from aiogram.exceptions import TelegramAPIError
 
 from core.database import AsyncSessionMaker
 
@@ -32,7 +33,7 @@ class MessageEraserMiddleware(BaseMiddleware):
         if last_message := data.get('last_message'):
             try:
                 await last_message.delete()
-            except Exception:
+            except TelegramAPIError:
                 pass
         message = await handler(event, data)
         await state.update_data(last_message=message)
