@@ -1,8 +1,13 @@
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
 
 from core.settings import settings
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 url_params = {
