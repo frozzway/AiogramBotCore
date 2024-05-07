@@ -7,17 +7,20 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, 
 
 class PaginatedKeyboard:
     @classmethod
-    async def create(cls, keyboard: InlineKeyboardBuilder, unique_name: str, state: FSMContext, page_size: int = 5,
+    async def create(cls, keyboard: InlineKeyboardBuilder, unique_name: str, state: FSMContext, page_size: int | None = 10,
                      pre: InlineKeyboardBuilder | None = None, post: InlineKeyboardBuilder | None = None,
                      text: str | None = None) -> PaginatedKeyboard:
         """
         Клавиатура с пагинацией.
         :param keyboard: объект, подвергающийся пагинации.
         :param unique_name: уникальное наименование клавиатуры.
+        :param page_size: количество кнопок на одной странице, без учета статического блока.
         :param pre: статический блок кнопок, который будет добавлен перед списком элементов на каждой странице.
         :param post: статический блок кнопок, который будет добавлен после навигационной строки на каждой странице.
         :param text: текст, который отправлялся вместе с клавиатурой в обработчике, где клавиатура была инициализирована.
         """
+        if page_size is None:
+            page_size = 1000
         self = cls(keyboard=keyboard, name=unique_name, state=state, page_size=page_size, pre=pre, post=post, text=text)
         await self._write_keyboard_to_state()
         await state.update_data(last_paginated_keyboard=self)

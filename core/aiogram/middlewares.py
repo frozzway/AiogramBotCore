@@ -1,6 +1,7 @@
 from typing import Callable, Any, Awaitable
 
 from aiogram import BaseMiddleware
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from core.database import AsyncSessionMaker
@@ -15,3 +16,23 @@ class DependencyInjectionMiddleware(BaseMiddleware):
     ) -> Any:
         async with AsyncSessionMaker() as session:
             await handler(event, data)
+
+
+class MessageEraserMiddleware(BaseMiddleware):
+    """Удаляет ранее отправленное ботом сообщение при запросе нового. Чаще всего применяется для команды /menu, чтобы
+    не плодить сообщения в чате с главным меню."""
+    async def __call__(
+            self,
+            handler: Callable[[Message, dict[str, Any]], Awaitable[Any]],
+            event: Message,
+            data: dict[str, Any]
+    ) -> Any:
+        state: FSMContext = data['state']
+        data = await state.get_data()
+        if last_message := data.get('last_message'):
+            try:
+                await last_message.delete()
+            except Exception:
+                pass
+        message = await handler(event, data)
+        await state.update_data(last_message=message)
