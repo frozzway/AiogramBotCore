@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 
-from aiogram_extensions.back_feature import back_button
+from aiogram_extensions import back_feature
 from aiogram_extensions.paginator import PaginatedKeyboard
 
 from core.aiogram.callbacks import Category
@@ -18,8 +18,9 @@ category_router.message.middleware(MessageEraserMiddleware())
 
 main_category = InlineKeyboardBuilder()
 main_category.button(text='Главное меню', callback_data=Category(id=1))
-post_buttons = back_button.copy()
+post_buttons = back_feature.back_button.copy()
 post_buttons.attach(main_category)
+post_buttons.adjust(1, 1)
 
 
 @category_router.callback_query(Category.filter())
@@ -30,6 +31,9 @@ async def render_category(event: CallbackQuery, state: FSMContext, callback_data
     elements = await category_manager.get_child_elements(category.id)
     markup = _get_category_markup(elements)
     keyboard = InlineKeyboardBuilder(markup=markup.inline_keyboard)
+
+    if category.id == 1:
+        await back_feature.erase_stack(state)
 
     post = post_buttons if category.id != 1 else None
     keyboard = await PaginatedKeyboard.create(keyboard=keyboard, state=state, page_size=category.page_size,
@@ -43,6 +47,7 @@ async def render_category(event: CallbackQuery, state: FSMContext, callback_data
 @category_router.message(Command('menu'))
 async def render_main_category(event: Message, state: FSMContext, category_manager: CategoryManager):
     """Отобразить главную категорию по команде /menu"""
+    await back_feature.erase_stack(state)
     category = await category_manager.get_category(1)
     elements = await category_manager.get_child_elements(category.id)
     markup = _get_category_markup(elements)

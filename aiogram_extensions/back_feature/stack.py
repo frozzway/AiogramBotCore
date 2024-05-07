@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+
+from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup
 
 
@@ -25,3 +27,14 @@ class Stack:
 
     def size(self) -> int:
         return len(self.items)
+
+    def erase(self):
+        self.items = []
+
+
+async def erase_stack(state: FSMContext):
+    state_data = await state.get_data()
+    stack: Stack = state_data.get('message_stack')
+    if stack:
+        stack.erase()
+        await state.update_data(message_stack=stack)
