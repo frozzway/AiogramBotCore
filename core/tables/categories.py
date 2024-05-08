@@ -55,6 +55,12 @@ class ScenarioButton(Button):
         "polymorphic_identity": "ScenarioButton",
     }
 
+    def __hash__(self):
+        return hash(self.callback_url)
+
+    def __eq__(self, other):
+        return isinstance(other, ScenarioButton) and self.callback_url == other.callback_url
+
 
 class Ownership(Base):
     """Принадлежность категорий и элементов родительской категории"""
