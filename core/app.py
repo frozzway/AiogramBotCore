@@ -2,6 +2,7 @@ import asyncio
 
 from aiogram import Dispatcher, Bot, Router
 from aioshedule import Scheduler
+from alembic import command
 from loguru import logger
 
 from aiogram_extensions.paginator import router as paginator_router
@@ -12,9 +13,9 @@ from core.aiogram import router as app_router
 from core.aiogram.middlewares import DependencyInjectionMiddleware
 from core.aiogram.callbacks import scenario_trigger_callbacks
 from core.dependencies import http_client
-from core.database import main_thread_async_engine, Base, AsyncSessionMaker
+from core.database import AsyncSessionMaker
 from core.managers import CategoryManager, ScenarioManager
-from core.settings import settings
+from core.settings import settings, alembic_cfg
 
 
 router = Router(name=__name__)
@@ -30,7 +31,7 @@ bot = Bot(token=settings.bot_token)
 
 
 async def on_startup(dispatcher: Dispatcher):
-    await create_tables()
+    run_migrations()
     await fill_database()
     http_client_dependency = http_client()
     client = await anext(http_client_dependency)
@@ -38,6 +39,10 @@ async def on_startup(dispatcher: Dispatcher):
     logger.info('Started polling...')
     await bot.set_my_commands(settings.bot_commands)
     await dispatcher.start_polling(bot, http_client=client)
+
+
+def run_migrations():
+    command.upgrade(config=alembic_cfg, revision='head')
 
 
 async def run_scheduled_tasks():
@@ -51,11 +56,6 @@ async def run_scheduled_tasks():
     while True:
         await schedule.run_pending()
         await asyncio.sleep(1)
-
-
-async def create_tables():
-    async with main_thread_async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
 
 async def fill_database():

@@ -1,4 +1,8 @@
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
 from aiogram.types import BotCommand
+from alembic.config import Config
 from pydantic_settings import BaseSettings
 
 
@@ -11,6 +15,7 @@ class Settings(BaseSettings):
     db_host: str = 'localhost'
     db_port: str = '5432'
     db_database: str = 'TelegramBotCore'
+    db_migrations_path: str = str(Path.cwd() / 'alembic_migrations')
     test_database: str = 'TestDatabase'
 
     bot_token: str = '6725907075:AAHslUsu8WEbr74XfCZaNpbSkaKhGco_is4'
@@ -30,3 +35,12 @@ settings = Settings(
     _env_file='.env',
     _env_file_encoding='utf-8',
 )
+
+
+alembic_config_path = Path(settings.db_migrations_path) / "alembic.ini"
+alembic_scripts_path = Path(settings.db_migrations_path) / "script"
+
+alembic_cfg = Config(alembic_config_path)
+alembic_cfg.set_main_option("script_location", str(alembic_scripts_path))
+
+timezone = ZoneInfo(settings.timezone)
