@@ -23,6 +23,6 @@ async_url_object = URL.create(
     **url_params
 )
 
-main_thread_async_engine = create_async_engine(async_url_object)
+main_thread_async_engine = create_async_engine(async_url_object, pool_size=5, max_overflow=0, pool_timeout=3600)
 
 AsyncSessionMaker = async_sessionmaker(main_thread_async_engine, expire_on_commit=False)
