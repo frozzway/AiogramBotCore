@@ -3,16 +3,12 @@ import functools
 import logging
 from datetime import datetime
 from typing import TypeVar
-from zoneinfo import ZoneInfo
 
 import httpx
 from dateutil.relativedelta import relativedelta
 from loguru import logger
 
-from core.settings import settings
 
-
-tz = ZoneInfo(settings.timezone)
 T = TypeVar('T')
 
 api_semaphore = asyncio.Semaphore(10)
