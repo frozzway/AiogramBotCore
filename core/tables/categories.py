@@ -1,14 +1,15 @@
+from datetime import datetime
 from functools import partial
 from typing import Union
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, TIMESTAMP
 from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy.orm import mapped_column
 
 from core.database import Base
 
 
-__all__ = ["Category", "Button", "LinkButton", "ScenarioButton", "Ownership", "Element"]
+__all__ = ["Category", "Button", "LinkButton", "ScenarioButton", "Ownership", "Element", "Statistic"]
 
 # Выбрасывать исключение при попытке обратиться к незагруженному свойству (lazy_loading)
 relationship = partial(relationship, lazy='raise_on_sql')
@@ -72,6 +73,16 @@ class Ownership(Base):
     button_id: Mapped[int | None] = mapped_column(ForeignKey('Buttons.id'), comment='Отнесенный элемент')
     position_x: Mapped[int | None] = mapped_column(comment='Позиция элемента в категории (номер столбца)')
     position_y: Mapped[int] = mapped_column(comment='Позиция элемента в категории (номер строки)')
+
+
+class Statistic(Base):
+    """Статистика посещений категорий"""
+    __tablename__ = 'Statistics'
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    category_id: Mapped[int] = mapped_column(ForeignKey('Categories.id'))
+    user_id: Mapped[str]
+    date: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True))
 
 
 Element = Union[Category, LinkButton, ScenarioButton]

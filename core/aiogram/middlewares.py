@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.exceptions import TelegramAPIError
 
 from core.database import AsyncSessionMaker
-from core.managers import CategoryManager
+from core.managers import CategoryManager, StatisticsManager
 
 
 class DependencyInjectionMiddleware(BaseMiddleware):
@@ -18,6 +18,7 @@ class DependencyInjectionMiddleware(BaseMiddleware):
     ) -> Any:
         async with AsyncSessionMaker() as session:
             data['category_manager'] = CategoryManager(session)
+            data['statistics_manager'] = StatisticsManager(session)
             await handler(event, data)
 
 
