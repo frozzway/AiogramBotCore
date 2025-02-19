@@ -54,7 +54,7 @@ async def run_scheduled_tasks():
     logger.info('Started background tasks...')
 
     while True:
-        await schedule.run_pending()
+        await schedule.run_pending(return_when='ALL_COMPLETED')
         await asyncio.sleep(1)
 
 
