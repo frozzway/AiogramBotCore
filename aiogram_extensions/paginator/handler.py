@@ -21,7 +21,9 @@ async def change_page(query: CallbackQuery, callback_data: Page, state: FSMConte
                 markup = keyboard.page(page)
                 keyboard.last_viewed_page = page
                 if keyboard.text:
-                    return await query.message.edit_text(text=keyboard.text, reply_markup=markup)
+                    return await query.message.edit_text(
+                        text=keyboard.text, reply_markup=markup, parse_mode=keyboard.parse_mode
+                    )
                 return await query.message.edit_reply_markup(reply_markup=markup)
     await query.answer('Повторите попытку')
     await query.message.delete()

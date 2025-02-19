@@ -9,7 +9,7 @@ class PaginatedKeyboard:
     @classmethod
     async def create(cls, keyboard: InlineKeyboardBuilder, unique_name: str, state: FSMContext, page_size: int | None = 10,
                      pre: InlineKeyboardBuilder | None = None, post: InlineKeyboardBuilder | None = None,
-                     text: str | None = None) -> PaginatedKeyboard:
+                     text: str | None = None, parse_mode: str = 'HTML') -> PaginatedKeyboard:
         """
         Клавиатура с пагинацией.
         :param keyboard: объект, подвергающийся пагинации.
@@ -18,16 +18,19 @@ class PaginatedKeyboard:
         :param pre: статический блок кнопок, который будет добавлен перед списком элементов на каждой странице.
         :param post: статический блок кнопок, который будет добавлен после навигационной строки на каждой странице.
         :param text: текст, который отправлялся вместе с клавиатурой в обработчике, где клавиатура была инициализирована.
+        :param parse_mode: форматирование текста.
         """
         if page_size is None:
             page_size = 1000
-        self = cls(keyboard=keyboard, name=unique_name, state=state, page_size=page_size, pre=pre, post=post, text=text)
+        self = cls(keyboard=keyboard, name=unique_name, state=state, page_size=page_size, pre=pre, post=post, text=text,
+                   parse_mode=parse_mode)
         await self._write_keyboard_to_state()
         await state.update_data(last_paginated_keyboard=self)
         return self
 
     def __init__(self, keyboard: InlineKeyboardBuilder, name: str, state: FSMContext, page_size: int = 5,
-                 pre: InlineKeyboardBuilder | None = None, post: InlineKeyboardBuilder | None = None, text: str | None = None):
+                 pre: InlineKeyboardBuilder | None = None, post: InlineKeyboardBuilder | None = None,
+                 text: str | None = None, parse_mode: str = 'HTML'):
         self.keyboard = keyboard
         self.pre = pre
         self.post = post
@@ -35,6 +38,7 @@ class PaginatedKeyboard:
         self.page_size = page_size
         self.last_viewed_page = 1
         self.text = text
+        self.parse_mode = parse_mode
         self.keyboard_id = name
         self.items = self.keyboard.export()
 
